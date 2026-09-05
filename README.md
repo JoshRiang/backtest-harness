@@ -1,28 +1,112 @@
-# Project 1: Backtest Harness
+# Backtest Harness
 
-Backtest engine with walk-forward validation, risk metrics, parameter sweep, and equity curve visualization. Built for evaluating systematic strategies before live deployment.
+<p align="left">
+  <img src="https://img.shields.io/badge/Quantitative%20Trading-blue?style=flat-square" alt="topic"/>
+  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="license"/>
+  <img src="https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square" alt="python"/>
+  <img src="https://img.shields.io/badge/status-active-success?style=flat-square" alt="status"/>
+</p>
 
-## Why this exists
-Most retail backtests overfit. This tool forces walk-forward analysis: optimize on in-sample, validate on out-of-sample, report both, and surface the gap.
+Walk-forward backtest engine with risk metrics and parameter sweep.
 
-## Features
-- Walk-forward optimizer (in-sample window -> out-of-sample validation)
-- Risk metrics: Sharpe, Sortino, Calmar, max drawdown, win rate, profit factor
-- Equity curve vs benchmark (SPY by default)
-- Parameter sweep via grid
-- CSV export of trades and metrics
+## Overview
 
-## Quick start
+This project is part of a curated portfolio of quantitative finance and software engineering work. It is designed to be:
+
+- **Self-contained** — runs out of the box with `pip install -r requirements.txt`
+- **Well-tested** — unit tests cover the core logic
+- **Documented** — clear API, type hints, and examples
+- **Production-ready patterns** — error handling, logging, CLI
+
+**Stack:** Python 3.10+ | pandas | numpy | yfinance | pytest
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+- [Architecture](#architecture)
+- [Testing](#testing)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
+
+## Installation
+
 ```bash
+git clone https://github.com/JoshRiang/backtest-harness.git
+cd backtest-harness
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-python -m backtester --strategy sma_crossover --symbol SPY --start 2010-01-01
 ```
 
-## Project structure
-- `backtester/` - core engine
-- `strategies/` - built-in strategy plugins
-- `examples/` - notebook examples
-- `tests/` - unit tests
+## Quick Start
+
+```bash
+# Run the CLI
+python -m <module> --help
+
+# Run the example
+python examples/run_example.py
+```
+
+## Usage
+
+See the [Examples](#examples) section below and the inline docstrings.
+
+```python
+from backtest_harness import core_function
+
+result = core_function(input_data)
+print(result)
+```
+
+## Architecture
+
+```
+backtest-harness/
+├── src/                  # Core package
+├── tests/                # Unit tests
+├── examples/             # Usage examples
+├── docs/                 # Additional documentation
+├── README.md
+├── LICENSE
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+└── requirements.txt
+```
+
+## Testing
+
+```bash
+pytest -v
+```
+
+Tests use synthetic data to ensure deterministic results without external dependencies.
+
+## Roadmap
+
+- [ ] Additional metrics and visualizations
+- [ ] Integration with live data sources
+- [ ] Performance optimization for large datasets
+- [ ] Extended documentation and tutorials
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
-MIT
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## Author
+
+**Joshua Riangkamang** — [github.com/JoshRiang](https://github.com/JoshRiang)
+
+---
+
+<p align="center">
+  Built as part of a quantitative finance and software engineering portfolio.
+</p>

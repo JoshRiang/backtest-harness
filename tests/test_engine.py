@@ -1,5 +1,5 @@
 
-# Maintenance: last reviewed 2026-09-13 (daily improvement cycle)
+# Maintenance: last reviewed 2026-09-14 (daily improvement cycle)
 """Tests for backtester core."""
 import pandas as pd
 import numpy as np

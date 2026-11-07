@@ -1,38 +1,8 @@
 # Backtest Harness
 
-<p align="left">
-  <img src="https://img.shields.io/badge/Quantitative%20Trading-blue?style=flat-square" alt="topic"/>
-  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="license"/>
-  <img src="https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square" alt="python"/>
-  <img src="https://img.shields.io/badge/status-active-success?style=flat-square" alt="status"/>
-</p>
+Walk-forward long-only backtest engine with risk metrics and parameter sweep.
 
-Walk-forward backtest engine with risk metrics and parameter sweep.
-
-## Overview
-
-This project is part of a curated portfolio of quantitative finance and software engineering work. It is designed to be:
-
-- **Self-contained** — runs out of the box with `pip install -r requirements.txt`
-- **Well-tested** — unit tests cover the core logic
-- **Documented** — clear API, type hints, and examples
-- **Production-ready patterns** — error handling, logging, CLI
-
-**Stack:** Python 3.10+ | pandas | numpy | yfinance | pytest
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Usage](#usage)
-- [Architecture](#architecture)
-- [Testing](#testing)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-- [Author](#author)
-
-## Installation
+Self-contained bar-by-bar simulator. A strategy is a function that takes a price DataFrame and returns a Series of target weights in `[0, 1]`. The engine steps through each bar, marks positions to market, rebalances on weight changes, and records every trade with entry/exit dates, prices, size, and PnL. Built-in strategies: SMA crossover, momentum (12-month return > 0), mean reversion (recent return below threshold). Metrics: Sharpe, Sortino, max drawdown, Calmar, total return, win rate. Walk-forward wrapper runs rolling train/test windows with an optimizer callback. CLI pulls data from yfinance and runs any registered strategy.
 
 ```bash
 git clone https://github.com/JoshRiang/backtest-harness.git
@@ -42,71 +12,71 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Quick Start
-
 ```bash
-# Run the CLI
-python -m <module> --help
+# Run SMA crossover on SPY via CLI
+python -m backtester --strategy sma_crossover --symbol SPY --start 2015-01-01 --capital 100000 --out spy_metrics.json
 
-# Run the example
-python examples/run_example.py
+# Run walk-forward optimization
+python -c "
+import pandas as pd
+import yfinance as yf
+from backtester.walkforward import WalkForward
+from backtester.engine import run_backtest
+from strategies.sma_crossover import sma_crossover
+
+df = yf.download('SPY', start='2010-01-01', end='2024-01-01')
+wf = WalkForward(df, train_size=504, test_size=126, step=63)
+results = wf.run(lambda tr: sma_crossover(tr, fast=20, slow=50))
+print(results[['train_start','test_start','sharpe','max_drawdown','win_rate']])
+"
 ```
-
-## Usage
-
-See the [Examples](#examples) section below and the inline docstrings.
 
 ```python
-from backtest_harness import core_function
+from backtester import BacktestEngine, run_backtest
+from strategies.sma_crossover import sma_crossover
+import yfinance as yf
 
-result = core_function(input_data)
-print(result)
+df = yf.download('SPY', start='2020-01-01', progress=False)
+weights = sma_crossover(df, fast=20, slow=50)
+res = run_backtest(df, weights, capital=100_000)
+
+print(f\"Total return: {res.metrics['total_return']:.2%}\")
+print(f\"Sharpe: {res.metrics['sharpe']:.2f}\")
+print(f\"Max drawdown: {res.metrics['max_drawdown']:.2%}\")
+print(f\"Win rate: {res.metrics['win_rate']:.1%}\")
+print(f\"Trades: {len(res.trades)}\")
 ```
 
-## Architecture
+Project structure:
 
 ```
 backtest-harness/
-├── src/                  # Core package
-├── tests/                # Unit tests
-├── examples/             # Usage examples
-├── docs/                 # Additional documentation
-├── README.md
+├── backtester/
+│   ├── __init__.py   # package exports: BacktestEngine, run_backtest, metrics, WalkForward
+│   ├── engine.py     # BacktestEngine (bar-by-bar sim), run_backtest one-liner
+│   ├── metrics.py    # sharpe, sortino, max_drawdown, calmar
+│   ├── walkforward.py# WalkForward rolling train/test windows
+│   └── __main__.py   # CLI: --strategy --symbol --start --capital --out
+├── strategies/
+│   ├── __init__.py
+│   └── sma_crossover.py   # sma_crossover, momentum, mean_reversion weight functions
+├── tests/
+│   ├── __init__.py
+│   └── test_engine.py     # synthetic data tests: run, metrics keys, walk-forward, sharpe edge cases
+├── requirements.txt   # yfinance, pandas, numpy, matplotlib
 ├── LICENSE
 ├── CHANGELOG.md
-├── CONTRIBUTING.md
-└── requirements.txt
+└── README.md
 ```
 
-## Testing
+Testing:
 
 ```bash
 pytest -v
 ```
 
-Tests use synthetic data to ensure deterministic results without external dependencies.
+Tests use synthetic price data (deterministic seed) — no network required.
 
-## Roadmap
+License: MIT — see [LICENSE](LICENSE).
 
-- [ ] Additional metrics and visualizations
-- [ ] Integration with live data sources
-- [ ] Performance optimization for large datasets
-- [ ] Extended documentation and tutorials
-
-## Contributing
-
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-## Author
-
-**Joshua Riangkamang** — [github.com/JoshRiang](https://github.com/JoshRiang)
-
----
-
-<p align="center">
-  Built as part of a quantitative finance and software engineering portfolio.
-</p>
+Author: Joshua Riangkamang — [github.com/JoshRiang](https://github.com/JoshRiang)
